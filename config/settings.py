@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'apps.feed',
     'apps.chatbot',
     'apps.speech',
+    'pgvector.django',
 ]
 
 MIDDLEWARE = [
