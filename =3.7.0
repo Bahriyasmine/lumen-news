@@ -1,0 +1,82 @@
+Collecting en-core-web-sm==3.7.1
+  Downloading https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl (12.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.8/12.8 MB 2.4 MB/s  0:00:05
+Requirement already satisfied: spacy in /usr/local/lib/python3.11/site-packages (3.8.7)
+Collecting spacy
+  Downloading spacy-3.7.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (27 kB)
+Requirement already satisfied: spacy-legacy<3.1.0,>=3.0.11 in /usr/local/lib/python3.11/site-packages (from spacy) (3.0.12)
+Requirement already satisfied: spacy-loggers<2.0.0,>=1.0.0 in /usr/local/lib/python3.11/site-packages (from spacy) (1.0.5)
+Requirement already satisfied: murmurhash<1.1.0,>=0.28.0 in /usr/local/lib/python3.11/site-packages (from spacy) (1.0.13)
+Requirement already satisfied: cymem<2.1.0,>=2.0.2 in /usr/local/lib/python3.11/site-packages (from spacy) (2.0.11)
+Requirement already satisfied: preshed<3.1.0,>=3.0.2 in /usr/local/lib/python3.11/site-packages (from spacy) (3.0.10)
+Collecting thinc<8.3.0,>=8.2.2 (from spacy)
+  Downloading thinc-8.2.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (15 kB)
+Requirement already satisfied: wasabi<1.2.0,>=0.9.1 in /usr/local/lib/python3.11/site-packages (from spacy) (1.1.3)
+Requirement already satisfied: srsly<3.0.0,>=2.4.3 in /usr/local/lib/python3.11/site-packages (from spacy) (2.5.1)
+Requirement already satisfied: catalogue<2.1.0,>=2.0.6 in /usr/local/lib/python3.11/site-packages (from spacy) (2.0.10)
+Requirement already satisfied: weasel<0.5.0,>=0.1.0 in /usr/local/lib/python3.11/site-packages (from spacy) (0.4.1)
+Requirement already satisfied: typer<1.0.0,>=0.3.0 in /usr/local/lib/python3.11/site-packages (from spacy) (0.20.0)
+Requirement already satisfied: tqdm<5.0.0,>=4.38.0 in /usr/local/lib/python3.11/site-packages (from spacy) (4.67.1)
+Requirement already satisfied: requests<3.0.0,>=2.13.0 in /usr/local/lib/python3.11/site-packages (from spacy) (2.32.5)
+Requirement already satisfied: pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4 in /usr/local/lib/python3.11/site-packages (from spacy) (2.12.3)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.11/site-packages (from spacy) (3.1.6)
+Requirement already satisfied: setuptools in /usr/local/lib/python3.11/site-packages (from spacy) (79.0.1)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.11/site-packages (from spacy) (25.0)
+Requirement already satisfied: langcodes<4.0.0,>=3.2.0 in /usr/local/lib/python3.11/site-packages (from spacy) (3.5.0)
+Requirement already satisfied: numpy>=1.19.0 in /usr/local/lib/python3.11/site-packages (from spacy) (2.3.4)
+Requirement already satisfied: language-data>=1.2 in /usr/local/lib/python3.11/site-packages (from langcodes<4.0.0,>=3.2.0->spacy) (1.3.0)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.11/site-packages (from pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4->spacy) (0.7.0)
+Requirement already satisfied: pydantic-core==2.41.4 in /usr/local/lib/python3.11/site-packages (from pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4->spacy) (2.41.4)
+Requirement already satisfied: typing-extensions>=4.14.1 in /usr/local/lib/python3.11/site-packages (from pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4->spacy) (4.15.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in /usr/local/lib/python3.11/site-packages (from pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4->spacy) (0.4.2)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.11/site-packages (from requests<3.0.0,>=2.13.0->spacy) (3.4.4)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.11/site-packages (from requests<3.0.0,>=2.13.0->spacy) (3.11)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.11/site-packages (from requests<3.0.0,>=2.13.0->spacy) (2.5.0)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.11/site-packages (from requests<3.0.0,>=2.13.0->spacy) (2025.10.5)
+Collecting blis<0.8.0,>=0.7.8 (from thinc<8.3.0,>=8.2.2->spacy)
+  Downloading blis-0.7.11-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.4 kB)
+Requirement already satisfied: confection<1.0.0,>=0.0.1 in /usr/local/lib/python3.11/site-packages (from thinc<8.3.0,>=8.2.2->spacy) (0.1.5)
+Collecting numpy>=1.19.0 (from spacy)
+  Downloading numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (61 kB)
+Requirement already satisfied: click>=8.0.0 in /usr/local/lib/python3.11/site-packages (from typer<1.0.0,>=0.3.0->spacy) (8.3.0)
+Requirement already satisfied: shellingham>=1.3.0 in /usr/local/lib/python3.11/site-packages (from typer<1.0.0,>=0.3.0->spacy) (1.5.4)
+Requirement already satisfied: rich>=10.11.0 in /usr/local/lib/python3.11/site-packages (from typer<1.0.0,>=0.3.0->spacy) (14.2.0)
+Requirement already satisfied: cloudpathlib<1.0.0,>=0.7.0 in /usr/local/lib/python3.11/site-packages (from weasel<0.5.0,>=0.1.0->spacy) (0.23.0)
+Requirement already satisfied: smart-open<8.0.0,>=5.2.1 in /usr/local/lib/python3.11/site-packages (from weasel<0.5.0,>=0.1.0->spacy) (7.4.3)
+Requirement already satisfied: wrapt in /usr/local/lib/python3.11/site-packages (from smart-open<8.0.0,>=5.2.1->weasel<0.5.0,>=0.1.0->spacy) (2.0.0)
+Requirement already satisfied: marisa-trie>=1.1.0 in /usr/local/lib/python3.11/site-packages (from language-data>=1.2->langcodes<4.0.0,>=3.2.0->spacy) (1.3.1)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /usr/local/lib/python3.11/site-packages (from rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy) (4.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /usr/local/lib/python3.11/site-packages (from rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy) (2.19.2)
+Requirement already satisfied: mdurl~=0.1 in /usr/local/lib/python3.11/site-packages (from markdown-it-py>=2.2.0->rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy) (0.1.2)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.11/site-packages (from jinja2->spacy) (3.0.3)
+Downloading spacy-3.7.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (6.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 2.4 MB/s  0:00:02
+Downloading thinc-8.2.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (920 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 920.2/920.2 kB 2.4 MB/s  0:00:00
+Downloading blis-0.7.11-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.2/10.2 MB 2.4 MB/s  0:00:04
+Downloading numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.3/18.3 MB 2.4 MB/s  0:00:07
+Installing collected packages: numpy, blis, thinc, spacy, en-core-web-sm
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.3.4
+    Uninstalling numpy-2.3.4:
+      Successfully uninstalled numpy-2.3.4
+  Attempting uninstall: blis
+    Found existing installation: blis 1.3.0
+    Uninstalling blis-1.3.0:
+      Successfully uninstalled blis-1.3.0
+  Attempting uninstall: thinc
+    Found existing installation: thinc 8.3.6
+    Uninstalling thinc-8.3.6:
+      Successfully uninstalled thinc-8.3.6
+  Attempting uninstall: spacy
+    Found existing installation: spacy 3.8.7
+    Uninstalling spacy-3.8.7:
+      Successfully uninstalled spacy-3.8.7
+  Attempting uninstall: en-core-web-sm
+    Found existing installation: en_core_web_sm 3.8.0
+    Uninstalling en_core_web_sm-3.8.0:
+      Successfully uninstalled en_core_web_sm-3.8.0
+
+Successfully installed blis-0.7.11 en-core-web-sm-3.7.1 numpy-1.26.4 spacy-3.7.5 thinc-8.2.5

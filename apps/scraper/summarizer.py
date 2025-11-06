@@ -33,27 +33,20 @@ def summarize_text(text, model, tokenizer, max_total_chars=400, device="cpu"):
 
 
 def summarize_article_by_id(article_id):
-    """Summarize a single article and save the result."""
     try:
         article = Article.objects.get(id=article_id)
     except Article.DoesNotExist:
         print(f"❌ Article with id {article_id} not found.")
-        return
+        return None
 
-    if not article.text:
-        print(f"⚠️ Article {article.id} has no text.")
-        return
+    if article.summary:
+        return article.summary
 
-    print(f"📰 Summarizing article: {article.title[:60]}...")
-    tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
-    model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn").to("cpu")
-
+    # Generate summary...
     summary = summarize_text(article.text, model, tokenizer)
     article.summary = summary
     article.save()
-
-    print(f"✅ Summary saved for article {article.id} ({len(summary)} chars).")
-
+    return summary
 
 # def summarize_all_articles(limit=5):
 #     """Summarize all articles that don't yet have summaries."""

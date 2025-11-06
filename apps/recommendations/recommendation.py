@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModel
 import torch
 from datetime import datetime
 from apps.users.models import UserPreference
-from apps.scraper.models import Article
+from apps.scraper.models import Article, ArticleEmbedding
 
 
 # Load model once at import
@@ -36,15 +36,29 @@ def get_user_embedding(user_pref):
         return np.zeros(384)
     return np.mean(embeddings, axis=0)
 
+def get_article_embedding(article_id):
+    """
+    Retrieve the embedding vector for a given Article ID.
+    Returns a Python list of floats, or None if not found.
+    """
+    try:
+        article_embedding = ArticleEmbedding.objects.get(article_id=article_id)
+        return article_embedding.embedding  # This is a pgvector.Vector object (list-like)
+    except ArticleEmbedding.DoesNotExist:
+        print(f"⚠️ No embedding found for article_id={article_id}")
+        return None
 
-def generate_recommendations_for_user(user_id, top_n=10):
+
+def generate_recommendations_for_user(user_id, top_n=20):
     """
     Generate personalized article recommendations for a given user from the database.
     """
 
     # Get user preferences
     try:
-        user_pref = UserPreference.objects.get(user_id=user_id)
+        user_pref = UserPreference.objects.get(
+            user_profile__user_id=user_id
+        )
     except UserPreference.DoesNotExist:
         raise ValueError(f"No preferences found for user ID {user_id}")
 
@@ -53,9 +67,7 @@ def generate_recommendations_for_user(user_id, top_n=10):
     min_sentiment = user_pref.min_sentiment or 0.5
 
     # Load articles
-    articles = Article.objects.filter(status="verified")
-    if not articles.exists():
-        articles = Article.objects.all()
+    articles = Article.objects.all()
 
     # Get user embedding (from DB or compute fallback)
     if user_pref.embedding is not None:
@@ -72,8 +84,9 @@ def generate_recommendations_for_user(user_id, top_n=10):
                 continue
 
         # Use DB embedding if exists, otherwise compute
-        if article.embedding is not None:
-            article_emb = np.array(article.embedding, dtype=float)
+        article_embedding=get_article_embedding(article.id)
+        if article_embedding is not None:
+            article_emb = np.array(article_embedding, dtype=float)
         else:
             text = article.text[:1000]
             inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(DEVICE)
@@ -90,10 +103,10 @@ def generate_recommendations_for_user(user_id, top_n=10):
 
         # Weighted combination
         final_score = (
-            0.60 * emb_sim +
-            0.25 * domain_score +
+            0.50 * emb_sim +
+            0.30 * domain_score +
             0.10 * recency +
-            0.05 * sentiment_score
+            0.10 * sentiment_score
         )
 
         recommendations.append({
@@ -107,7 +120,7 @@ def generate_recommendations_for_user(user_id, top_n=10):
         })
 
     # Sort by score
-    recommendations = sorted(recommendations, key=lambda x: x["score"], reverse=True)[:top_n]
+    recommendations = sorted(recommendations, key=lambda x: x["score"], reverse=True)[:]
 
     # Display for debugging
     print(f"\nRecommendations for user {user_id}")

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
+    <link rel="stylesheet" href="{% static 'css/style-login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Hello and Welcome</h2>
+                <p>Signup account</p>
+            </div>
+
+            <form class="login-form" id="signupForm" novalidate>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                        <label for="username">Username</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="usernameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                        <label for="email">Email Address</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <input type="password" id="password1" name="password1" required autocomplete="new-password">
+                        <label for="password1">Password</label>
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                            <span class="eye-icon"></span>
+                        </button>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="password1Error"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <input type="password" id="password2" name="password2" required autocomplete="new-password">
+                        <label for="password2">Confirm Password</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="password2Error"></span>
+                </div>
+
+                <button type="submit" class="login-btn btn">
+                    <span class="btn-text">Sign Up</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+
+            <div class="social-login">
+                <a href="{% url 'google_login' %}" class="social-btn google-btn">
+                    <span class="social-icon google-icon"></span>
+                    Google
+                </a>
+                <a href="{% url 'github_login' %}" class="social-btn github-btn">
+                    <span class="social-icon github-icon"></span>
+                    GitHub
+                </a>
+            </div>
+
+            <p class="text-light mb-0 mt-4">
+               Already have an account? <a href="{% url 'signin' %}" class="text-white link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Snackbar UI + Logic -->
+    <div id="snackbar"></div>
+    <style>
+        #snackbar {
+            visibility: hidden;
+            min-width: 280px;
+            margin-left: -140px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 10000;
+            left: 50%;
+            bottom: 24px;
+            font-size: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        #snackbar.show { visibility: visible; opacity: 1; }
+        #snackbar.success { background-color: #4CAF50; }
+        #snackbar.error { background-color: #f44336; }
+    </style>
+
+    <script>
+        function getCSRFToken() {
+          return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        function showSnackbar(message, isSuccess = false) {
+            const snackbar = document.getElementById("snackbar");
+            snackbar.textContent = message;
+            snackbar.className = isSuccess ? "show success" : "show error";
+            setTimeout(() => {
+                snackbar.className = snackbar.className.replace("show", "");
+            }, 3000);
+        }
+
+        // Toggle password visibility (optional but nice)
+        document.getElementById('passwordToggle')?.addEventListener('click', () => {
+            const pwd = document.getElementById('password1');
+            const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
+            pwd.setAttribute('type', type);
+            document.querySelector('.eye-icon').textContent = type === 'password' ? '' : '👁';
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+
+            // Clear all errors
+            document.getElementById('usernameError').textContent = '';
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('password1Error').textContent = '';
+            document.getElementById('password2Error').textContent = '';
+
+            // Client-side password match check
+            if (password1 !== password2) {
+                showSnackbar("Passwords do not match.", false);
+                return;
+            }
+
+            const submitBtn = document.querySelector('.login-btn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoader = submitBtn.querySelector('.btn-loader');
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-block';
+
+            const csrftoken =getCSRFToken();
+            if (!csrftoken) {
+                showSnackbar("CSRF token missing. Please reload the page.", false);
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/registration/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: JSON.stringify({ username, email, password1, password2 }),
+                });
+
+                if (!response.ok) {
+                    let data;
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Non-JSON error:', errorText);
+                        showSnackbar("Registration failed. Please try again.", false);
+                        return;
+                    }
+
+                    // Field-specific errors
+                    if (data.username) document.getElementById('usernameError').textContent = data.username.join(', ');
+                    if (data.email) document.getElementById('emailError').textContent = data.email.join(', ');
+                    if (data.password1) document.getElementById('password1Error').textContent = data.password1.join(', ');
+                    if (data.password2) document.getElementById('password2Error').textContent = data.password2.join(', ');
+
+                    // Global errors
+                    if (data.non_field_errors) {
+                        showSnackbar(data.non_field_errors.join(', '), false);
+                    } else if (!data.username && !data.email && !data.password1 && !data.password2) {
+                        showSnackbar("Registration failed: " + (data.detail || "Unknown error"), false);
+                    }
+                    return;
+                }
+
+                // Success!
+                showSnackbar("Account created! Redirecting to login...", true);
+                setTimeout(() => {
+                    window.location.href = '{% url "signin" %}';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Network error:', error);
+                showSnackbar("Network error. Please check your connection.", false);
+            } finally {
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .typeform-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+        }
+
+        .step {
+            display: none;
+            padding: 2.5rem;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            margin-bottom: 2rem;
+        }
+
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.4s ease;
+        }
+
+        .btn-typeform {
+            background: #6a11cb;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-typeform:hover {
+            background: #5a0fb8;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid #6a11cb;
+            color: #6a11cb;
+            background: transparent;
+        }
+
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            text-align: left;
+            padding: 16px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover,
+        .option-btn.selected {
+            border-color: #6a11cb;
+            background: #f0f7ff;
+        }
+
+        #domainChips .chip {
+            background: #6a11cb;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #domainChips .chip .remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #preferencesText {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        #preferencesText:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="typeform-card">
+        <div class="progress-bar">
+            <div class="progress" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <form id="onboardingForm">
+            {% csrf_token %}
+
+            <!-- Step 1: Domains -->
+            <div class="step active" data-step="1">
+                <h2 class="question">What topics interest you? (Select all that apply)</h2>
+                <div class="mb-3">
+                    <div id="domainChips" class="d-flex flex-wrap gap-2 mb-3"></div>
+                    <div class="options">
+                        <button type="button" class="option-btn" data-value="health">Health & Wellness</button>
+                        <button type="button" class="option-btn" data-value="tech">Technology</button>
+                        <button type="button" class="option-btn" data-value="sports">Sports</button>
+                        <button type="button" class="option-btn" data-value="politics">Politics</button>
+                    </div>
+                </div>
+                <input type="hidden" name="domains" id="domainsInput">
+                <div class="mt-4 d-flex justify-content-between">
+                    <div></div>
+                    <button type="button" class="btn-typeform" onclick="nextStep(1)">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Mental State -->
+            <div class="step" data-step="2">
+                <h2 class="question">How are you feeling today?</h2>
+                <div class="options">
+                    <button type="button" class="option-btn" data-value="happy">Happy</button>
+                    <button type="button" class="option-btn" data-value="satisfied">Satisfied</button>
+                    <button type="button" class="option-btn" data-value="neutral">Neutral</button>
+                    <button type="button" class="option-btn" data-value="stressed">Stressed</button>
+                    <button type="button" class="option-btn" data-value="sad">Sad</button>
+                </div>
+                <input type="hidden" name="mental_state" id="mentalStateInput">
+                <div class="mt-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline" onclick="prevStep(2)">Back</button>
+                    <button type="button" class="btn-typeform" onclick="nextStep(2)">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Min Sentiment -->
+            <div class="step" data-step="3">
+                <h2 class="question">What kind of news do you prefer?</h2>
+                <div class="options">
+                    <button type="button" class="option-btn" data-value="0.8">Only positive news</button>
+                    <button type="button" class="option-btn" data-value="0.5">Mostly positive, some neutral</button>
+                    <button type="button" class="option-btn" data-value="0.0">All types (positive, neutral, negative)</button>
+                </div>
+                <input type="hidden" name="min_sentiment" id="sentimentInput">
+                <div class="mt-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline" onclick="prevStep(3)">Back</button>
+                    <button type="button" class="btn-typeform" onclick="nextStep(3)">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Custom Preference Text -->
+            <div class="step" data-step="4">
+                <h2 class="question">Tell us what kind of news you love</h2>
+                <p class="text-muted mb-3">Be specific! e.g., "I love football, AI, and positive stories"</p>
+
+                <div class="form-group">
+                    <textarea class="form-control" id="preferencesText" rows="4"
+                        placeholder="Type your preferences here..." required></textarea>
+                </div>
+
+                <input type="hidden" name="preferences_text" id="preferencesTextInput">
+
+                <div class="mt-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline" onclick="prevStep(4)">Back</button>
+                    <button type="button" class="btn-typeform" onclick="submitForm()">Finish</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        let selectedDomains = new Set();
+
+        function updateProgress() {
+            const percent = ((currentStep - 1) / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+
+        function nextStep(step) {
+            let valid = true;
+
+            if (step === 1) {
+                if (selectedDomains.size === 0) {
+                    alert('Please select at least one domain');
+                    valid = false;
+                } else {
+                    document.getElementById('domainsInput').value = Array.from(selectedDomains).join(',');
+                }
+            } else if (step === 2) {
+                const selected = document.querySelector(`.step[data-step="2"] .option-btn.selected`);
+                if (!selected) {
+                    alert('Please select your mental state');
+                    valid = false;
+                } else {
+                    document.getElementById('mentalStateInput').value = selected.dataset.value;
+                }
+            } else if (step === 3) {
+                const selected = document.querySelector(`.step[data-step="3"] .option-btn.selected`);
+                if (!selected) {
+                    alert('Please select your news preference');
+                    valid = false;
+                } else {
+                    document.getElementById('sentimentInput').value = selected.dataset.value;
+                }
+            }
+
+            if (!valid) return;
+
+            document.querySelector(`.step[data-step="${step}"]`).classList.remove('active');
+            currentStep = step + 1;
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+            updateProgress();
+        }
+
+        function prevStep(step) {
+            document.querySelector(`.step[data-step="${step}"]`).classList.remove('active');
+            currentStep = step - 1;
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+            updateProgress();
+        }
+
+        // Domain chips
+        document.querySelectorAll('.option-btn[data-value]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const value = this.dataset.value;
+                if (selectedDomains.has(value)) {
+                    selectedDomains.delete(value);
+                    this.classList.remove('selected');
+                } else {
+                    selectedDomains.add(value);
+                    this.classList.add('selected');
+                }
+                renderDomainChips();
+            });
+        });
+
+        function renderDomainChips() {
+            const container = document.getElementById('domainChips');
+            container.innerHTML = '';
+            selectedDomains.forEach(domain => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `${domain} <span class="remove" data-value="${domain}">×</span>`;
+                container.appendChild(chip);
+            });
+            document.querySelectorAll('.remove').forEach(span => {
+                span.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const value = span.dataset.value;
+                    selectedDomains.delete(value);
+                    document.querySelector(`.option-btn[data-value="${value}"]`).classList.remove('selected');
+                    renderDomainChips();
+                });
+            });
+        }
+
+        // Select buttons
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (this.closest('.step').dataset.step !== '1') {
+                    this.closest('.options').querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        async function submitForm() {
+            const preferencesText = document.getElementById('preferencesText').value.trim();
+            if (!preferencesText) {
+                alert('Please tell us what kind of news you love!');
+                return;
+            }
+
+            document.getElementById('preferencesTextInput').value = preferencesText;
+
+            const payload = {
+                domains: document.getElementById('domainsInput').value,
+                mental_state: document.getElementById('mentalStateInput').value,
+                min_sentiment: parseFloat(document.getElementById('sentimentInput').value),
+                preferences_text: preferencesText
+            };
+
+            try {
+                const response = await fetch('{% url "save_preferences" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    window.location.href = "{% url 'feed:feed' %}";
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to save preferences'));
+                }
+            } catch (err) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        updateProgress();
+    </script>
+</body>
+
+</html>

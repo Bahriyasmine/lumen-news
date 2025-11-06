@@ -77,7 +77,3 @@ logs/
 .cache/
 
 
-# Ignore models.py if you want to exclude it (optional)
-apps/scraper/models.py
-apps/users/models.py
-apps/recommendations/models.py

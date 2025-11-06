@@ -2,12 +2,15 @@ import os
 from pathlib import Path
 from decouple import config
 
+# Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECURITY
 SECRET_KEY = config('SECRET_KEY', default='dev-secret-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -15,15 +18,31 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',        # ← Required for allauth
+    'django.contrib.postgres',     # ← Required for ArrayField & pgvector
+
+    # Your apps
     'apps.scraper',
     'apps.debate',
     'apps.sentiment',
-    'apps.users',
+    #'apps.users',
     'apps.recommendations',
     'apps.feed',
     'apps.chatbot',
     'apps.speech',
-    'pgvector.django',
+    'apps.users',          # ← Only this    # Third-party
+    'pgvector.django',             # ← After django.contrib.postgres
+    'rest_framework',
+    'rest_framework.authtoken',    # ← Fixed typo
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'pgvector',
+    # Allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
 ]
 
 MIDDLEWARE = [
@@ -36,8 +55,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URL & WSGI
 ROOT_URLCONF = 'config.urls'
+WSGI_APPLICATION = 'config.wsgi.application'
 
+# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -54,8 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
-
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -67,6 +88,7 @@ DATABASES = {
     }
 }
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -74,16 +96,61 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+# Static files
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-
+LOGIN_URL = '/home/Login'
+# Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# =============================================================================
+# AUTH & ALLAUTH
+# =============================================================================
+# =============================================================================
+# AUTH & ALLAUTH
+# =============================================================================
+SITE_ID = 1
+
+# DO NOT disable username
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'  # ← REQUIRED
+ACCOUNT_USERNAME_REQUIRED = True                # ← REQUIRED
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # ← Allow both
+
+# dj-rest-auth
+REST_AUTH = {
+    'USE_JWT': False,
+    'SESSION_LOGIN': True,
+}
+
+# REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
+
+# =============================================================================
+# EMAIL (dev only)
+# =============================================================================
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# =============================================================================
+# SESSION & CSRF
+# =============================================================================
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+CSRF_COOKIE_HTTPONLY = False
+
+# =============================================================================
+# CELERY
+# =============================================================================
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://redis:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']

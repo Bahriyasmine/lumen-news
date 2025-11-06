@@ -1,0 +1,9 @@
+  =>  Template Name    : Newsers - Free HTML Magazine Template
+
+  =>  Template Link    : https://htmlcodex.com/html-magazine-template
+
+  =>  Template License : https://htmlcodex.com/license (or read the LICENSE.txt file)
+
+  =>  Template Author  : HTML Codex
+
+  =>  Author Website   : https://htmlcodex.com

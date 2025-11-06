@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glassmorphism Login Form</title>
+    <link rel="stylesheet" href="{% static 'css/style-login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Welcome Back</h2>
+                <p>Sign in to your account</p>
+            </div>
+
+            <form class="login-form" id="loginForm" novalidate>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                        <label for="username">Username</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="usernameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                        <label for="password">Password</label>
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                            <span class="eye-icon"></span>
+                        </button>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <div class="form-options">
+                    <a href="{% url 'account_reset_password' %}" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="login-btn btn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+
+            <div class="social-login">
+                <a href="{% url 'google_login' %}" class="social-btn google-btn">
+                    <span class="social-icon google-icon"></span>
+                    Google
+                </a>
+                <a href="{% url 'github_login' %}" class="social-btn github-btn">
+                    <span class="social-icon github-icon"></span>
+                    GitHub
+                </a>
+            </div>
+
+            <p class="text-light mb-0">
+               Don't have an account? <a href="{% url 'signup' %}" class="text-white link-offset-2 link-underline-opacity-25 link-underline-opacity-75-hover">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showSnackbar(message, isSuccess = false) {
+        const snackbar = document.getElementById("snackbar");
+        snackbar.textContent = message;
+        snackbar.className = isSuccess ? "show success" : "show error";
+        setTimeout(() => {
+            snackbar.className = snackbar.className.replace("show", "");
+        }, 3000);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        document.getElementById('usernameError').textContent = '';
+        document.getElementById('passwordError').textContent = '';
+
+        const submitBtn = document.querySelector('.login-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'inline-block';
+
+        const csrftoken = getCookie('csrftoken');
+        if (!csrftoken) {
+            showSnackbar("CSRF token missing. Please reload the page.", false);
+            submitBtn.disabled = false;
+            btnText.style.display = 'inline';
+            btnLoader.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+            });
+
+            if (!response.ok) {
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const errorText = await response.text();
+                    console.error('Non-JSON error:', errorText);
+                    showSnackbar(`Login failed (Status ${response.status})`, false);
+                    return;
+                }
+
+                if (data.non_field_errors) {
+                    showSnackbar(data.non_field_errors.join(', '), false);
+                } else if (data.username) {
+                    document.getElementById('usernameError').textContent = data.username.join(', ');
+                } else if (data.password) {
+                    document.getElementById('passwordError').textContent = data.password.join(', ');
+                } else {
+                    showSnackbar('Login failed: ' + (data.detail || 'Unknown error'), false);
+                }
+                // 🔑 Track failed attempts and show hint after 3
+                let failedAttempts = parseInt(localStorage.getItem('loginFailedAttempts') || '0');
+                failedAttempts += 1;
+                localStorage.setItem('loginFailedAttempts', failedAttempts.toString());
+
+                if (failedAttempts >= 3) {
+                    let hint = document.getElementById('passwordResetHint');
+                    if (!hint) {
+                        hint = document.createElement('div');
+                        hint.id = 'passwordResetHint';
+                        hint.style.cssText = `
+                            margin-top: 12px;
+                            padding: 8px 12px;
+                            background: rgba(40, 40, 40, 0.7);
+                            border-left: 3px solid #4CAF50;
+                            font-size: 13px;
+                            color: #e0e0e0;
+                            border-radius: 0 6px 6px 0;
+                            backdrop-filter: blur(4px);
+                        `;
+                        hint.innerHTML = '💡 <a href="{% url "account_reset_password" %}" style="color:#4CAF50; text-decoration:underline;">Reset your password</a>';
+                        document.querySelector('.login-form').appendChild(hint);
+                    }
+                }
+                return;
+            }
+
+            const data = await response.json();
+            console.log('Login successful:', data);
+
+            if (data.access_token) localStorage.setItem('accessToken', data.access_token);
+            if (data.refresh_token) localStorage.setItem('refreshToken', data.refresh_token);
+            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+            showSnackbar('Login successful! Redirecting...', true);
+            setTimeout(() => {
+                    window.location.href = "{% url 'onboarding' %}";
+            }, 1500); // slight delay so user sees success
+
+        } catch (error) {
+            console.error('Network error:', error);
+            showSnackbar('Network error. Please check your connection.', false);
+        } finally {
+            submitBtn.disabled = false;
+            btnText.style.display = 'inline';
+            btnLoader.style.display = 'none';
+        }
+    });
+</script>
+    <div id="snackbar"></div>
+
+<style>
+#snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 30px;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+#snackbar.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+#snackbar.success {
+    background-color: #4CAF50;
+}
+#snackbar.error {
+    background-color: #f44336;
+}
+</style>
+</body>
+</html>
