@@ -150,7 +150,7 @@
                                 Feed</a>
                             <a href="{% url 'feed:feed' %}"
                                 class="nav-item nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}">Recommendation</a>
-                            <a href="#" class="nav-item nav-link">Bookmarks</a>
+                                <a href="{% url 'chatbot:chat_page' %}" class="nav-item nav-link">ChatBot</a>
                             <a href="#" class="nav-item nav-link">Contact Us</a>
                         </div>
                         <div class="d-flex flex-nowrap border-top pt-3 pt-xl-0">
@@ -268,6 +268,9 @@
                         </div>
                         <button class="btn btn-success summarize-btn">Summarize</button>
                         <button id="analyze-btn" class="btn btn-info">Analyze Sentiment</button>
+                        <button class="btn btn-info debate-btn" data-article-id="{{ article.id }}">
+                            Debate
+                        </button>
 
                         <a href="{% url 'feed:feed' %}" class="btn btn-secondary">Back to Feed</a>
                     </div>
@@ -281,6 +284,17 @@
         </div>
     </div>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.debate-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const articleId = this.getAttribute('data-article-id');
+            // Open in the same tab
+            //window.location.href = `/debate/${articleId}/`;
+            // OR open in a new tab:
+             window.open(`/debate/${articleId}/`, '_blank');
+        });
+    });
+});
         document.addEventListener('DOMContentLoaded', () => {
             // Get all articles
             document.querySelectorAll('.article').forEach(articleEl => {
@@ -471,53 +485,53 @@
             </div>
         </div>
     </div>
-<script>
-    document.getElementById("analyze-btn").addEventListener("click", async () => {
-        const modalEl = document.getElementById("sentimentModal");
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
+    <script>
+        document.getElementById("analyze-btn").addEventListener("click", async () => {
+            const modalEl = document.getElementById("sentimentModal");
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
 
-        // Show loading, hide result/error
-        document.getElementById("sentiment-loading").style.display = "block";
-        document.getElementById("sentiment-result").style.display = "none";
-        document.getElementById("sentiment-error").style.display = "none";
+            // Show loading, hide result/error
+            document.getElementById("sentiment-loading").style.display = "block";
+            document.getElementById("sentiment-result").style.display = "none";
+            document.getElementById("sentiment-error").style.display = "none";
 
-        // Get article ID from data-id attribute
-        const articleDiv = document.querySelector(".article-text");
-        const articleId = articleDiv.dataset.id;  // ← from data-id="{{ article.id }}"
-        const text = articleDiv.innerText.trim(); // fallback text
+            // Get article ID from data-id attribute
+            const articleDiv = document.querySelector(".article-text");
+            const articleId = articleDiv.dataset.id;  // ← from data-id="{{ article.id }}"
+            const text = articleDiv.innerText.trim(); // fallback text
 
-        try {
-            const response = await fetch("/analyze-sentiment/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: articleId,    // ← Django will fetch summary
-                    text: text        // ← optional fallback
-                })
-            });
+            try {
+                const response = await fetch("/analyze-sentiment/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id: articleId,    // ← Django will fetch summary
+                        text: text        // ← optional fallback
+                    })
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (data.success) {
+                if (data.success) {
+                    document.getElementById("sentiment-loading").style.display = "none";
+                    document.getElementById("sentiment-result").style.display = "block";
+
+                    document.getElementById("sentiment-text").innerText = data.sentiment.toUpperCase();
+                    document.getElementById("sentiment-confidence").innerText = (data.confidence * 100).toFixed(1) + "%";
+                    document.getElementById("sentiment-explanation").innerText = data.textual_explanation;
+                    document.getElementById("shap-img").src = "data:image/png;base64," + data.waterfall_plot;
+                } else {
+                    throw new Error(data.error || "Analysis failed");
+                }
+            } catch (err) {
                 document.getElementById("sentiment-loading").style.display = "none";
-                document.getElementById("sentiment-result").style.display = "block";
-
-                document.getElementById("sentiment-text").innerText = data.sentiment.toUpperCase();
-                document.getElementById("sentiment-confidence").innerText = (data.confidence * 100).toFixed(1) + "%";
-                document.getElementById("sentiment-explanation").innerText = data.textual_explanation;
-                document.getElementById("shap-img").src = "data:image/png;base64," + data.waterfall_plot;
-            } else {
-                throw new Error(data.error || "Analysis failed");
+                const errorDiv = document.getElementById("sentiment-error");
+                errorDiv.style.display = "block";
+                errorDiv.innerText = err.message;
             }
-        } catch (err) {
-            document.getElementById("sentiment-loading").style.display = "none";
-            const errorDiv = document.getElementById("sentiment-error");
-            errorDiv.style.display = "block";
-            errorDiv.innerText = err.message;
-        }
-    });
-</script>
+        });
+    </script>
     <!-- Popup sentiment End-->
 
 

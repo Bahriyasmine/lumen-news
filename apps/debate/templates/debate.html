@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Debate - Real-time Streaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        button {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1e3c72;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #4CAF50;
+        }
+
+        .status-indicator.streaming {
+            background: #2196F3;
+        }
+
+        .status-indicator.error {
+            background: #f44336;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .debate-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .round-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .agent-response {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .agent-response.defender {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+
+        .agent-response.opposer {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+
+        .agent-response.judge {
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .agent-label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .agent-label.defender {
+            color: #1976D2;
+        }
+
+        .agent-label.opposer {
+            color: #F57C00;
+        }
+
+        .agent-label.judge {
+            color: #7B1FA2;
+        }
+
+        .agent-content {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* JUDGE VERDICT STYLES */
+        .verdict-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .verdict-header {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .verdict-score-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-value {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .verdict-badge {
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .verdict-badge.legitimate {
+            background: #4CAF50;
+        }
+
+        .verdict-badge.partially_legitimate {
+            background: #FF9800;
+        }
+
+        .verdict-badge.questionable {
+            background: #FF5722;
+        }
+
+        .verdict-badge.likely_fake {
+            background: #F44336;
+        }
+
+        .reasoning-chain {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .reasoning-step {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            background: rgba(255, 255, 255, 0.3);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-factor {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1em;
+        }
+
+        .step-impact {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .step-impact.positive {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        .step-impact.negative {
+            background: rgba(244, 67, 54, 0.8);
+        }
+
+        .step-evidence {
+            margin: 10px 0;
+            font-style: italic;
+            opacity: 0.95;
+        }
+
+        .step-justification {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .key-findings {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .findings-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .finding-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .winner-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        .winner-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .winner-name {
+            font-size: 2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .winning-arguments {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .argument-item {
+            margin: 10px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .argument-item:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            animation: blink 1.4s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Fakeness and bias analysis </h1>
+
+        <div class="input-section">
+            <h3>Article to Debate</h3>
+            <textarea id="articleInput" placeholder="Paste article text here..." class="form-control" rows="10">Source: {{ article_source }}
+Headline: {{ article_title }}
+
+{{ article_text|default:'' }}</textarea>
+
+
+            <button id="startBtn" onclick="startDebate()">Start Debate</button>
+        </div>
+
+        <div class="status" id="status">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="statusText">Ready to start</span>
+        </div>
+
+        <div id="debateContent"></div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let currentRound = 0;
+        let currentAgent = null;
+        let tokenCount = 0;
+        let startTime = null;
+        let judgeBuffer = '';
+
+        function startDebate() {
+            const article = document.getElementById('articleInput').value;
+            const startBtn = document.getElementById('startBtn');
+            const debateContent = document.getElementById('debateContent');
+
+            debateContent.innerHTML = '';
+            currentRound = 0;
+            currentAgent = null;
+            tokenCount = 0;
+            startTime = Date.now();
+            judgeBuffer = '';
+
+            startBtn.disabled = true;
+            startBtn.textContent = 'Debate in progress...';
+
+            updateStatus('streaming', 'Connecting to debate stream...');
+
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            const url = `/debate/stream/?article=${encodeURIComponent(article)}`;
+            eventSource = new EventSource(url);
+
+            eventSource.onopen = () => {
+                console.log('✅ SSE connection opened');
+                updateStatus('connected', 'Connected - waiting for debate to start...');
+            };
+
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('📨 Event:', data.type, data);
+
+                handleEvent(data);
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('❌ SSE error:', error);
+                updateStatus('error', 'Connection error - retrying...');
+
+                setTimeout(() => {
+                    if (eventSource.readyState === EventSource.CLOSED) {
+                        eventSource.close();
+                        startBtn.disabled = false;
+                        startBtn.textContent = 'Start Debate';
+                        updateStatus('error', 'Connection lost. Please try again.');
+                    }
+                }, 3000);
+            };
+        }
+
+        function handleEvent(data) {
+            switch (data.type) {
+                case 'connected':
+                    updateStatus('connected', 'Connected successfully');
+                    break;
+
+                case 'agent_start':
+                    currentAgent = data.agent;
+                    currentRound = data.round;
+
+                    console.log(`🎯 Agent started: ${data.agent} - Round ${data.round}`);
+
+                    updateStatus('streaming', `Round ${data.round}: ${data.agent} is speaking...`);
+
+                    if (data.agent === 'judge') {
+                        judgeBuffer = '';
+                    }
+
+                    ensureAgentContainer(data.agent, data.round);
+                    break;
+
+                case 'token':
+                    if (data.token) {
+                        tokenCount++;
+
+                        if (data.agent === 'judge') {
+                            judgeBuffer += data.token;
+
+                            // Try to parse JSON if we have enough content
+                            if (judgeBuffer.includes('}')) {
+                                tryRenderJudgeVerdict();
+                            }
+                        } else {
+                            appendToken(data.agent, data.round, data.token);
+                        }
+
+                        updateStatus('streaming',
+                            `Round ${data.round || '?'}: ${data.agent || 'unknown'} speaking... (${tokenCount} tokens)`
+                        );
+                    }
+                    break;
+
+                case 'complete':
+                    console.log('✅ Debate complete!');
+
+                    // Final attempt to render judge verdict
+                    if (judgeBuffer) {
+                        tryRenderJudgeVerdict();
+                    }
+
+                    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+                    updateStatus('connected', `Debate completed! (${duration}s, ${tokenCount} tokens)`);
+
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('startBtn').textContent = 'Start New Debate';
+
+                    eventSource.close();
+                    break;
+
+                case 'error':
+                    console.error('❌ Error:', data.message);
+                    updateStatus('error', `Error: ${data.message}`);
+
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('startBtn').textContent = 'Start Debate';
+
+                    eventSource.close();
+                    break;
+            }
+        }
+
+        function tryRenderJudgeVerdict() {
+            try {
+                // Extract JSON from buffer (handle cases where there's extra text)
+                let jsonStr = judgeBuffer.trim();
+
+                // Find first { and last }
+                const firstBrace = jsonStr.indexOf('{');
+                const lastBrace = jsonStr.lastIndexOf('}');
+
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+
+                    const verdict = JSON.parse(jsonStr);
+                    renderJudgeVerdict(verdict);
+                    judgeBuffer = ''; // Clear buffer after successful render
+                }
+            } catch (e) {
+                // Not valid JSON yet, keep buffering
+                console.log('Waiting for complete JSON...');
+            }
+        }
+
+        function renderJudgeVerdict(verdict) {
+            const containerId = 'judge-roundnull';
+            const container = document.getElementById(containerId);
+
+            if (!container) return;
+
+            const scorePercent = (verdict.legitimacy_score * 100).toFixed(0);
+            const confidencePercent = verdict.confidence === 'high' ? 90 :
+                verdict.confidence === 'medium' ? 70 : 50;
+
+            let html = `
+                <div class="verdict-container">
+                    <div class="verdict-header">⚖️ Final Verdict</div>
+                    
+                    <div class="verdict-score-section">
+                        <div class="score-circle">
+                            <div class="score-value">${scorePercent}%</div>
+                            <div class="score-label">Legitimacy</div>
+                        </div>
+                        <div class="score-circle">
+                            <div class="score-value">${confidencePercent}%</div>
+                            <div class="score-label">Confidence</div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <span class="verdict-badge ${verdict.verdict}">${verdict.verdict.replace(/_/g, ' ')}</span>
+                    </div>
+                    
+                    <div class="reasoning-chain">
+                        <div class="findings-title">🔍 Reasoning Chain</div>
+            `;
+
+            if (verdict.reasoning_chain && verdict.reasoning_chain.length > 0) {
+                verdict.reasoning_chain.forEach(step => {
+                    const isPositive = step.impact && step.impact.toString().includes('+');
+                    html += `
+                        <div class="reasoning-step">
+                            <div class="step-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="step-number">${step.step}</div>
+                                    <div class="step-factor">${step.factor}</div>
+                                </div>
+                                <div class="step-impact ${isPositive ? 'positive' : 'negative'}">
+                                    ${step.impact}
+                                </div>
+                            </div>
+                            <div class="step-evidence">"${step.evidence}"</div>
+                            <div class="step-justification">${step.justification}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+
+            if (verdict.key_findings && verdict.key_findings.length > 0) {
+                html += `
+                    <div class="key-findings">
+                        <div class="findings-title">📋 Key Findings</div>
+                `;
+                verdict.key_findings.forEach(finding => {
+                    html += `<div class="finding-item">• ${finding}</div>`;
+                });
+                html += '</div>';
+            }
+
+            if (verdict.winner) {
+                html += `
+                    <div class="winner-section">
+                        <div class="winner-title">🏆 Debate Winner</div>
+                        <div class="winner-name">${verdict.winner}</div>
+                `;
+
+                if (verdict.winning_arguments && verdict.winning_arguments.length > 0) {
+                    html += '<div class="winning-arguments">';
+                    verdict.winning_arguments.forEach(arg => {
+                        html += `<div class="argument-item">${arg}</div>`;
+                    });
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        function ensureAgentContainer(agent, round) {
+            const containerId = `${agent}-round${round}`;
+
+            if (document.getElementById(containerId)) {
+                return;
+            }
+
+            const debateContent = document.getElementById('debateContent');
+
+            const roundId = `round-${round}`;
+            if (!document.getElementById(roundId)) {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'debate-section';
+                roundDiv.id = roundId;
+                if (round !== null) {
+                    roundDiv.innerHTML = `<div class="round-header">Round ${round}</div>`;
+                }
+                debateContent.appendChild(roundDiv);
+            }
+
+            const agentDiv = document.createElement('div');
+            agentDiv.className = `agent-response ${agent}`;
+            agentDiv.id = containerId;
+
+            if (agent === 'judge') {
+                agentDiv.innerHTML = `
+                    <div class="agent-content" id="${containerId}-content">
+                        <div style="text-align: center; padding: 30px;">
+                            <span class="typing-indicator" style="font-size: 2em;">⚖️ Deliberating...</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                agentDiv.innerHTML = `
+                    <div class="agent-label ${agent}">${agent.toUpperCase()}</div>
+                    <div class="agent-content" id="${containerId}-content">
+                        <span class="typing-indicator">▊</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById(roundId).appendChild(agentDiv);
+        }
+
+        function appendToken(agent, round, token) {
+            const containerId = `${agent}-round${round}-content`;
+            const container = document.getElementById(containerId);
+
+            if (container) {
+                const indicator = container.querySelector('.typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+
+                container.textContent += token;
+
+                container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        }
+
+        function updateStatus(type, message) {
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('statusText');
+
+            indicator.className = `status-indicator ${type}`;
+            text.textContent = message;
+        }
+    </script>
+</body>
+
+</html>

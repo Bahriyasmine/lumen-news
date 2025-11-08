@@ -37,7 +37,7 @@ services:
   web:
     build: .
     container_name: lumen_web
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
@@ -56,11 +56,13 @@ services:
       redis:
         condition: service_healthy
 
+
   # Celery Worker
   celery_worker:
     build: .
     container_name: lumen_celery_worker
-    command: celery -A config worker -l info
+    #command: sh -c "python manage.py migrate && celery -A config worker -l info"
+    command: sh -c "celery -A config worker --pool=solo -l info"
     volumes:
       - .:/app
     env_file:

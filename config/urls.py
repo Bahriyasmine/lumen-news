@@ -8,7 +8,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     #path('', include('apps.feed.urls')),  # Feed URLs
     path('', include(('apps.feed.urls', 'feed'), namespace='feed')),  # Add namespace here
-    #--------------------------------
+    path('chatbot/', include('apps.chatbot.urls')),
+    path("debate/", include("apps.debate.urls")),
+
     path('home/', views.home, name='home'),
     path('home/Signup', views.signup_page, name='signup'),
     path('home/Login', views.signin_page, name='signin'),

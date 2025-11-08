@@ -1,26 +1,67 @@
-Django==5.0.0
-python-decouple==3.8
-psycopg2-binary==2.9.9
+# === CORE FRAMEWORK ===
+Django>=5.0,<5.1
+djangorestframework>=3.15.0
+
+# === AUTH STACK ===
+dj-rest-auth[with_social]>=5.0.1
+django-allauth>=0.55.0
+
+# === SETTINGS & ENV ===
+python-decouple>=3.8
+python-dotenv>=1.1.0
+
+# === DATABASE ===
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5
+
+# === TASK QUEUE ===
 celery==5.3.4
-redis==5.0.1
-pgvector==0.2.4
-torch==2.1.2
-transformers==4.36.2
-sentence-transformers==2.3.1
+redis>=5.0.1
+
+# === HTTP / SCRAPING / PARSING ===
+aiohttp>=3.13.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.4
+lxml_html_clean>=0.1.1
+newspaper3k>=0.2.8
+feedparser>=6.0.0
+httpx>=0.27.0
+
+# === LLMs / AI TOOLCHAIN ===
+crewai>=0.203.0
+groq>=0.4.1
+langchain>=0.3.7
+langchain-community>=0.3.7
+langchain-groq>=0.2.2
+langchain-huggingface>=0.1.0
+langchain-postgres>=0.0.12
+pydantic>=2.7,<3.0
+pydantic-settings>=2.4,<3.0
+
+# === NLP / ML (CPU-ONLY) ===
+torch>=2.1.0 --index-url https://download.pytorch.org/whl/cpu
+transformers>=4.47.0
+sentence-transformers>=3.3.0
 sentencepiece
-scikit-learn
-groq==0.4.1
-feedparser==6.0.10
-requests==2.31.0
-beautifulsoup4==4.12.2
-openai-whisper==20231117
-soundfile==0.12.1
-numpy==1.26.2
-pandas==2.1.4
-python-dateutil==2.8.2
-shap
-spacy>=3.0
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
-sentence-transformers>=2.2.0
-dj-rest-auth[with_social]==5.0.1
-django-allauth==0.55.2
+scikit-learn>=1.5.0
+numpy>=1.26.0
+pandas>=2.1.0
+python-dateutil>=2.8.0
+shap>=0.46.0
+rank-bm25>=0.2.2
+
+# === NLP: spaCy + NLTK ===
+spacy>=3.7.0
+nltk>=3.8.1
+
+# === AUDIO / TTS / STT ===
+gTTS>=2.5.0
+pydub>=0.25.0
+soundfile>=0.12.1
+openai-whisper>=20231117
+
+# === UTILITIES ===
+pytz>=2025.2
+schedule>=1.2.0
+matplotlib>=3.9.0

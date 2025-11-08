@@ -141,17 +141,34 @@ import matplotlib.pyplot as plt
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
-from nltk.corpus import stopwords
-import spacy
+import nltk
+# nltk.data.path.insert(0, '/usr/local/nltk_data')  # <--- INSERT AT FRONT
 
-# ----------------------------------------------------------------------
-# Global objects
-# ----------------------------------------------------------------------
-nlp = spacy.load("en_core_web_sm", disable=["parser", "tagger"])
+# from nltk.corpus import stopwords
+# EN_STOPWORDS = set(stopwords.words("english"))
+# Nothing runs at import time - just defines the function
+def get_spacy_stopwords():
+    """This function ONLY runs when you call it"""
+    import spacy  # ← Import happens HERE, inside function
+    nlp = spacy.load("en_core_web_sm")  # ← Only loads when function is called
+    return nlp.Defaults.stop_words
+
+_nlp = None
+
+def get_nlp():
+    global _nlp
+    if _nlp is None:
+        import spacy
+        try:
+            _nlp = spacy.load("en_core_web_sm", disable=["parser", "tagger"])
+            print("spaCy model loaded")
+        except OSError as e:
+            print(f"spaCy model failed: {e}")
+            _nlp = None
+    return _nlp
 MODEL_PATH = "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis"
 sentiment_model = None
 sentiment_tokenizer = None
-EN_STOPWORDS = set(stopwords.words("english"))
 id2label = {0: "negative", 1: "neutral", 2: "positive"}
 
 # ----------------------------------------------------------------------
@@ -177,7 +194,7 @@ def load_sentiment_model():
 def text_cleaning(text: str) -> str:
     if not isinstance(text, str):
         text = str(text)
-
+    nlp = get_nlp()
     # 1. Replace entities
     doc = nlp(text)
     for ent in doc.ents:
@@ -193,8 +210,8 @@ def text_cleaning(text: str) -> str:
 
     # 4. Normalize whitespace
     text = re.sub(r'\s+', ' ', text).strip()
-
-    # 5. Remove stopwords (but keep <TAG>)
+    EN_STOPWORDS = get_spacy_stopwords()
+    #5. Remove stopwords (but keep <TAG>)
     words = [
         w for w in text.split()
         if w not in EN_STOPWORDS and w not in {"<person>", "<org>", "<gpe>", "<money>", "<date>"}

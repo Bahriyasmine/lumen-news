@@ -1,0 +1,194 @@
+defend_task:
+  description: |
+    You are defending the credibility of this article.
+
+    ARTICLE TO ANALYZE:
+    {article_text}
+
+    PREVIOUS DEBATE CONTEXT:
+    {context}
+
+    ⚠️ CRITICAL OUTPUT RULE ⚠️
+    DO NOT write any of these phrases ANYWHERE in your response:
+    - "Final Answer"
+    - "FINAL ANSWER"
+    - "I now can give a great answer"
+    - "Thought:"
+    - "Here is my response"
+    - Any meta-commentary about what you're doing
+    
+    START IMMEDIATELY with your actual argument. First word should be "I" or "This" or "The" or "While".
+
+    YOUR TASK:
+    {% if context and 'OPPOSER' in context %}
+    ROUND 2 - You must respond to the opposer's challenges:
+    1. DO NOT simply repeat your previous arguments
+    2. Directly address each of the opposer's red flags
+    3. Either refute them with evidence, or concede but minimize their impact
+    4. Introduce NEW evidence or perspectives
+
+    For each opposer concern:
+    - Quote their specific claim
+    - Provide a direct counter-argument with evidence
+    - Explain why your interpretation is more valid
+
+    Example: "While you raised concerns about [X], I believe this is actually [counter-argument] because [evidence]."
+    {% else %}
+    ROUND 1 - Present your opening arguments:
+    Present 3 strong arguments for why this article appears credible.
+
+    Structure each argument as:
+    "I believe this article is credible because of [FACTOR]. [Specific evidence]. [Why this matters]."
+
+    Focus on:
+    - SOURCE CREDIBILITY: Publication reputation, author credentials
+    - LANGUAGE QUALITY: Professional tone, clear writing, proper citations
+    - FACTUAL CONSISTENCY: Verifiable claims, corroborating evidence
+    
+    {% endif %}
+
+    Keep your response conversational and under 200 words.
+
+  expected_output: "Evidence-based credibility arguments in conversational style (~200 words)"
+  agent: "defender_agent"
+
+oppose_task:
+  description: |
+    You are challenging the credibility of this article.
+
+    ARTICLE TO ANALYZE:
+    {article_text}
+
+    DEFENDER'S ARGUMENTS:
+    {context}
+
+    ⚠️ CRITICAL OUTPUT RULE ⚠️
+    DO NOT write any of these phrases ANYWHERE in your response:
+    - "Final Answer"
+    - "FINAL ANSWER"
+    - "I now can give a great answer"
+    - "Thought:"
+    - "Here is my response"
+    - Any meta-commentary about what you're doing
+    
+    START IMMEDIATELY with your actual argument. First word should be "Your" or "The" or "This" or a quoted phrase.
+
+    YOUR TASK:
+    {% if context and ('ROUND 2' in context or 'Round 2' in context) %}
+    ROUND 2 - Push back against the defender's rebuttals:
+    
+    CRITICAL: This is ROUND 2. You must NOT repeat your Round 1 arguments.
+    
+    1. Read the defender's Round 2 rebuttals carefully
+    2. Address EACH rebuttal point they made
+    3. Show why their rebuttals are weak or insufficient
+    4. Deepen your critique with additional evidence
+
+    For each defender rebuttal:
+    - Acknowledge what they said
+    - Explain why it doesn't resolve your concern
+    - Provide additional evidence that strengthens your red flag
+
+    Structure: "You claimed [X], but this doesn't address the core issue because [reasoning]. In fact, [additional evidence]."
+    
+    DO NOT start with "ROUND 1" - you are in ROUND 2!
+    {% else %}
+    ROUND 1 - Identify red flags:
+    Identify 3 specific red flags that challenge the article's credibility. Address the defender's points directly.
+
+    Structure each red flag as:
+    "[Specific element] is suspicious BECAUSE [concrete evidence and reasoning]."
+
+    Focus on:
+    - MANIPULATION PATTERNS: Loaded language, emotional appeals, misleading framing
+    - VERIFICATION GAPS: Missing sources, unverifiable claims, lack of counterpoints
+    - BIAS INDICATORS: One-sided reporting, selective facts, editorialized language
+    
+    {% endif %}
+
+    Keep your response conversational and under 200 words. Quote specific text from the article.
+
+  expected_output: "Evidence-based red flags in conversational rebuttal style (~200 words)"
+  agent: "opposer_agent"
+
+judge_task:
+  description: |
+    You are the judge. Evaluate both sides of the debate and deliver a verdict.
+
+    ARTICLE ANALYZED:
+    {full_article}
+
+    COMPLETE DEBATE TRANSCRIPT:
+    {context}
+
+    ⚠️ CRITICAL OUTPUT RULE ⚠️
+    Your response must be PURE JSON ONLY.
+    
+    DO NOT write:
+    - "Final Answer:" or "FINAL ANSWER:"
+    - "I now can give a great answer"
+    - "Thought:"
+    - "Here is my verdict"
+    - ```json or any markdown
+    - ANY text before { or after }
+    
+    Your FIRST character must be: {
+    Your LAST character must be: }
+
+    YOUR TASK:
+    Analyze the full debate and determine the article's legitimacy score.
+
+    CRITICAL INSTRUCTIONS FOR JUDGING:
+    1. Evaluate the QUALITY of arguments, not just quantity
+    2. Check if agents followed debate rules (Round 2 should respond to Round 1)
+    3. Penalize agents who repeated themselves instead of engaging
+    4. Reward agents who provided evidence and engaged with opponent's points
+    5. Balance both sides fairly - don't automatically favor one side
+
+    REQUIRED JSON FORMAT (return EXACTLY this structure):
+    {{
+      "legitimacy_score": 0.75,
+      "verdict": "partially_legitimate",
+      "confidence": "medium",
+      "reasoning_chain": [
+        {{
+          "step": 1,
+          "factor": "source",
+          "evidence": "Specific evidence from debate",
+          "impact": "+0.2",
+          "justification": "Why this factor matters and how much weight it carries"
+        }},
+        {{
+          "step": 2,
+          "factor": "language",
+          "evidence": "Another piece of evidence",
+          "impact": "-0.15",
+          "justification": "Explanation of impact on credibility"
+        }}
+      ],
+      "key_findings": ["Finding 1", "Finding 2", "Finding 3"],
+      "winner": "defender",
+      "winning_arguments": ["Strongest argument that swayed verdict"]
+    }}
+    
+    IMPACT CALCULATION RULES:
+    - Start from baseline 0.5 (neutral)
+    - Each factor adds or subtracts based on strength of evidence
+    - Strong positive evidence: +0.15 to +0.25
+    - Moderate positive evidence: +0.05 to +0.14
+    - Strong negative evidence: -0.15 to -0.25
+    - Moderate negative evidence: -0.05 to -0.14
+    - Sum all impacts to reach final legitimacy_score
+    - Ensure legitimacy_score = 0.5 + sum(all impacts)
+
+    Score ranges:
+    - 0.8-1.0: "legitimate" (high credibility)
+    - 0.6-0.79: "partially_legitimate" (credible with concerns)
+    - 0.4-0.59: "questionable" (significant doubts)
+    - 0.0-0.39: "likely_fake" (low credibility)
+
+    Verdict options: "legitimate", "partially_legitimate", "questionable", "likely_fake"
+    Winner options: "defender", "opposer", "tie"
+
+  expected_output: "Valid JSON object ONLY - no markdown, no extra text"
+  agent: "judge_agent"

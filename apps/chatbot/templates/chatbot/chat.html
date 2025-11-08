@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lumen News</title>
+<!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@100;600;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (for arrow) -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    height:100vh;display:flex;justify-content:center;align-items:center}
+  .chat-container{
+    width:90%;max-width:800px;height:90vh;background:#fff;border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden}
+  .chat-header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:25px 20px;text-align:center}
+  .chat-header h1{font-size:28px;margin-bottom:8px;font-weight:600}
+  .chat-header p{font-size:14px;opacity:.95;margin-bottom:12px}
+  .categories{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin-top:10px}
+  .category-badge{background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;backdrop-filter:blur(10px)}
+  .chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f5f5f5}
+  .message{margin-bottom:20px;display:flex;animation:fadeIn .3s ease-in}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .message.user{justify-content:flex-end}
+  .message-content{
+    position:relative;max-width:75%;padding:14px 18px;border-radius:18px;word-wrap:break-word;line-height:1.6}
+  .message.user .message-content{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+  .message.bot .message-content{background:#fff;color:#333;border:1px solid #e0e0e0;padding-right:50px}
+  .typing-indicator{display:none;padding:12px 16px;background:#fff;border-radius:18px;width:60px;border:1px solid #e0e0e0}
+  .typing-indicator.active{display:flex;gap:4px}
+  .typing-dot{width:8px;height:8px;background:#667eea;border-radius:50%;animation:typing 1.4s infinite}
+  .typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+  @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}}
+  .chat-input-container{padding:20px;background:#fff;border-top:1px solid #e0e0e0}
+  .chat-input-wrapper{display:flex;gap:10px;align-items:center}
+  .chat-input{flex:1;padding:14px 18px;border:2px solid #e0e0e0;border-radius:25px;font-size:14px;outline:none;transition:border-color .3s}
+  .chat-input:focus{border-color:#667eea}
+  .send-button{padding:14px 28px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;border-radius:25px;cursor:pointer;font-weight:600;transition:transform .2s}
+  .send-button:hover{transform:scale(1.05)}
+  .send-button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .error-message{background:#ffebee;color:#c62828;padding:12px;border-radius:12px;margin:10px 0;font-size:13px}
+  .icon-button{
+    width:44px;height:44px;border:none;border-radius:50%;background:#eeeeee;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,background .2s}
+  .icon-button:hover{transform:scale(1.05)}
+  .icon-button.active{background:#ffe3e3}
+  .icon{width:20px;height:20px;display:inline-block;line-height:0}
+  .bubble-tts{
+    position:absolute;right:10px;bottom:10px;width:28px;height:28px;border:none;border-radius:50%;
+    background:#eaf0ff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .15s,background .2s}
+  .bubble-tts:hover{transform:scale(1.05);background:#dde6ff}
+  .bubble-tts:active{transform:scale(.97)}
+</style>
+</head>
+<body>
+  <div class="chat-container">
+    
+    <div class="chat-header">
+<!-- TOP-LEFT BACK BUTTON -->
+  <a href="{% url 'feed:latest-feed' %}" 
+     style="position: absolute; left: 15px; top: 15px; z-index: 10; display: inline-flex; align-items: center; padding: 8px 16px; font-size: 14px; font-weight: 500; color: #333; background: #fff; border: 1px solid #ddd; border-radius: 50px; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: all 0.2s ease;"
+     onmouseover="this.style.background='#f8f9fa'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'"
+     onmouseout="this.style.background='#fff'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'">
+    <i class="fas fa-arrow-left" style="margin-right: 8px; font-size: 16px;"></i> Back
+  </a>
+      <h1>Lumen News</h1>
+      <p>Your intelligent news assistant</p>
+      <div class="categories">
+        <span class="category-badge">🏃 Sports</span>
+        <span class="category-badge">🏛️ Politics</span>
+        <span class="category-badge">⚕️ Health</span>
+        <span class="category-badge">💻 Technology</span>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        <div class="message-content">
+          Hello! 👋 I'm Lumen, your news assistant. I can help you find information about recent news in sports, politics, health, and technology. What would you like to know?
+          <button class="bubble-tts" type="button" title="Listen" onclick="speakText(this.parentElement.innerText.replace('🔊','').trim())">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-container">
+      <div class="chat-input-wrapper">
+        <button class="icon-button" id="micButton" title="Voice" onclick="toggleRecording()">
+          <span class="icon" aria-hidden="true">🎤</span>
+        </button>
+
+        <input type="text" class="chat-input" id="messageInput" placeholder="Ask me about any news topic..." onkeypress="handleKeyPress(event)" />
+
+        <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="ttsPlayer"></audio>
+
+<script>
+  const chatMessages = document.getElementById('chatMessages');
+  const messageInput = document.getElementById('messageInput');
+  const sendButton   = document.getElementById('sendButton');
+  const sessionId    = 'session_' + Date.now();
+
+  function addMessage(content, isUser){
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'message-content';
+    bubble.innerHTML = content;
+
+    if(!isUser){
+      const ttsBtn = document.createElement('button');
+      ttsBtn.className = 'bubble-tts';
+      ttsBtn.type = 'button';
+      ttsBtn.title = 'Listen';
+      ttsBtn.innerHTML = '🔊';
+      ttsBtn.onclick = () => speakText(bubble.innerText.replace('🔊','').trim());
+      bubble.appendChild(ttsBtn);
+    }
+
+    messageDiv.appendChild(bubble);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showTyping(){
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message bot';
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
+      <div class="typing-indicator active">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>`;
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  function hideTyping(){
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function showError(message){
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = `Error: ${message}`;
+    chatMessages.appendChild(errorDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function sendMessage(){
+    const message = messageInput.value.trim();
+    if(!message) return;
+
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+
+    addMessage(message, true);
+    messageInput.value = '';
+    showTyping();
+
+    try{
+      const response = await fetch('/chatbot/api/chat/', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message, session_id: sessionId })
+      });
+      const data = await response.json();
+      hideTyping();
+      if(data.success){
+        addMessage(data.response, false);
+      }else{
+        showError(data.error || 'Failed to get response');
+      }
+    }catch(e){
+      hideTyping();
+      showError('Network error. Please check your connection.');
+    }
+
+    messageInput.disabled = false;
+    sendButton.disabled = false;
+    messageInput.focus();
+  }
+
+  function handleKeyPress(event){ if(event.key==='Enter') sendMessage(); }
+
+  // ---- per-bubble TTS ----
+  async function speakText(text){
+    if(!text) return;
+    try{
+      const res = await fetch('/chatbot/api/tts/',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      if(!data.success) return;
+      const url = data.audio_url || (data.filename ? `/chatbot/api/audio/${data.filename}` : null);
+      if(!url) return;
+      const p = document.getElementById('ttsPlayer');
+      p.src = url;
+      await p.play();
+    }catch(_){ /* silent */ }
+  }
+
+  // ---- voice input (mic) → /chatbot/api/chat-voice/ ----
+  let mediaRecorder=null, recordedChunks=[], micStream=null;
+
+  async function toggleRecording(){
+    const btn = document.getElementById('micButton');
+
+    // Stop if already recording
+    if(mediaRecorder && mediaRecorder.state==='recording'){
+      mediaRecorder.stop();
+      btn.classList.remove('active');
+      return;
+    }
+
+    try{
+      micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(micStream,{mimeType:'audio/webm'});
+
+      mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+
+      // >>> This is the block you asked where to put <<<
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+        const form = new FormData();
+        form.append('audio', blob, 'recording.webm');
+        form.append('session_id', sessionId);
+
+        // release mic immediately
+        try { micStream.getTracks().forEach(t => t.stop()); } catch(_) {}
+
+        showTyping();
+        try {
+          const res = await fetch('/chatbot/api/chat-voice/', { method: 'POST', body: form });
+          const data = await res.json();
+          hideTyping();
+
+          if (data.success) {
+            // show my transcribed question as a USER bubble
+            const userText = (data.transcript || data.question || '').trim() || '(voice message)';
+            addMessage(userText, true);
+
+            // then bot answer
+            addMessage(data.response, false);
+          } else {
+            showError(data.error || 'Voice request failed');
+          }
+        } catch (err) {
+          hideTyping();
+          showError('Network error');
+        }
+      };
+
+      mediaRecorder.start();
+      btn.classList.add('active');
+    }catch(err){
+      showError('Microphone permission denied');
+    }
+  }
+
+  window.addEventListener('load', ()=> messageInput.focus());
+</script>
+</body>
+</html>

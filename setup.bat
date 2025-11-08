@@ -39,9 +39,10 @@ if not exist .env (
 
 docker-compose build
 docker-compose up -d db redis
+docker-compose run --rm web python -m spacy download en_core_web_sm
 timeout /t 10 /nobreak >nul
-docker-compose run --rm web python manage.py migrate
-docker-compose run --rm web python manage.py createsuperuser
+@REM docker-compose run --rm web python manage.py migrate
+@REM docker-compose run --rm web python manage.py createsuperuser
 
 echo Setup complete! Run run.bat to start.
 pause

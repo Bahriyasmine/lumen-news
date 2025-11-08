@@ -1,0 +1,22 @@
+{
+  "sports": [
+    {"source": "ESPN", "url": "https://www.espn.com/espn/rss/news"},
+    {"source": "BBC Sport", "url": "http://feeds.bbci.co.uk/sport/rss.xml"},
+    {"source": "Sky Sports", "url": "https://www.skysports.com/rss/12040"}
+  ],
+  "politics": [
+    {"source": "Reuters Politics", "url": "https://www.reutersagency.com/feed/?best-topics=politics&post_type=best"},
+    {"source": "BBC Politics", "url": "http://feeds.bbci.co.uk/news/politics/rss.xml"},
+    {"source": "Politico", "url": "https://www.politico.com/rss/politics08.xml"}
+  ],
+  "tech": [
+    {"source": "TechCrunch", "url": "https://techcrunch.com/feed/"},
+    {"source": "The Verge", "url": "https://www.theverge.com/rss/index.xml"},
+    {"source": "Wired", "url": "https://www.wired.com/feed/rss"}
+  ],
+  "health": [
+    {"source": "WHO News", "url": "https://www.who.int/feeds/entity/mediacentre/news/en/rss.xml"},
+    {"source": "Medical News Today", "url": "https://www.medicalnewstoday.com/rss"},
+    {"source": "Healthline", "url": "https://www.healthline.com/rss"}
+  ]
+}
